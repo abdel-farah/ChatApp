@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: 
+        border-box; 
+      }
+      body { 
+        font: 13px Helvetica, Arial;
+      }
+
+      .container{
+        display: flex;
+        border: 15px solid white;
+        height: 600px;
+        max-height: 600px;
+        overflow-y: auto;
+
+      }
+      .chatBox{
+        flex-grow: 6;
+        order: 1;
+        display: flex;
+        align-items: flex-end;
+        background-color: #404040;
+        max-width: 1000px;
+        border: 2px solid white;
+        border-radius: 15px;
+        overflow-x: auto;
+
+      }
+      #userName{
+        padding-top: 5px;
+        padding-left: 12px;
+      }
+      #messages{
+        list-style-type: none;
+        color: #ffffff;
+        padding: 5px 10px; 
+
+      }
+      .chatList{
+        order: 2;
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-end;
+        background-color: #404040;
+        border: 2px solid white;
+        border-radius: 15px;
+      }
+      .chatList li{
+        list-style-type: none;
+        color: #ffffff;
+        padding: 5px 10px; 
+      }
+      .qBox{
+        position: fixed;
+        bottom: 0;
+        width: 95%;
+      }
+      form { 
+        
+
+      }
+      form input { 
+        border: 1px solid black; 
+        padding: 10px;
+        border-radius: 15px; 
+        width: 100%; 
+        margin-bottom: 5px;
+        outline: none;
+
+      }
+      form button {
+      width: 9%; 
+      background: rgb(130, 224, 255); 
+      border: none; 
+      padding: 10px; 
+      }
+
+      @media (max-width: 1000px){
+        .container{
+        display: flex;
+        border: 15px solid white;
+        height: 400px;
+        max-height: 400px;
+        overflow-y: auto;      
+        
+      }
+       @media (max-width: 800px){
+        .container{
+        display: flex;
+        border: 15px solid white;
+        height: 200px;
+        max-height: 400px;
+        overflow-y: auto;      
+        
+      }
+      
+      
+    </style>
+  </head>
+  <body>
+  <p id="userName"></p>
+  <div class="container">
+   <div class="chatBox">
+      <ul id="messages"></ul>
+    </div>
+    <div class="chatList">
+      <ul id="list"></ul>
+    </div>
+    <div class="qBox">
+      <form action="">
+        <input id="m" autocomplete="off" />
+      </form>
+    </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function () {
+        var socket = io();
+        var nickName= '';
+        var nickColor = '';
+
+
+        $('form').submit(function(e){
+          e.preventDefault(); // prevents page reloading
+          var message = $('#m').val()
+          message = nickName + ':' + ' ' + message
+          socket.emit('chat message', message, nickColor);
+          $('#m').val('');
+          return false;
+        });
+        socket.on('chat message', function(msg, nickColor){
+          if(msg.includes(nickName)){
+            $('#messages').append($('<li>').css({"color": nickColor, "font-weight": "bold"}).text(msg));
+          }
+          else{
+            $('#messages').append($('<li>').css({"color": nickColor, "font-weight": "normal"}).text(msg));
+          }
+        });
+        socket.on('uniqueName', function(uniqueName){
+          nickName = uniqueName;
+          document.cookie = "nickName=" + nickName;
+          console.log(document.cookie);
+          console.log(socket.name);
+          $('#userName').text(document.cookie);
+        });
+        socket.on('userUpdate', function(userList){
+            $('#list').empty();
+            console.log("UPDATING LIST..");
+            for (var i = userList.length - 1; i >= 0; i--) {
+              $('#list').append($('<li>').text(userList[i]));
+              }
+        });
+
+        socket.on('check for username', function(){
+          console.log(nickName);
+          socket.emit('generate username', nickName);
+          
+        });
+
+        socket.on('update color', function(color){
+            nickColor = color;
+        });
+
+        socket.on('chatUpdate', function(chatLog){
+            for (var j = 0; j < chatLog.length; j++) {
+              $('#messages').append($('<li>').text(chatLog[j]));
+              }
+        });
+      });
+    </script>
+  </body>
+</html>

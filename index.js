@@ -1,6 +1,4 @@
 var app = require('express')();
-var cookieParser = require('cookie-parser'); // module for parsing cookies
-app.use (cookieParser ());
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var counter = 0;
@@ -16,8 +14,7 @@ var numberOfUsers= 0;
 var reqCookies;
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
-  reqCookies=req.cookies;
-  console.log(reqCookies);
+ 
 
 });
 

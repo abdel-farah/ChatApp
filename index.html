@@ -150,7 +150,7 @@
           document.cookie = "nickName=" + nickName;
           console.log(document.cookie);
           console.log(socket.name);
-          $('#userName').text(document.cookie);
+          $('#userName').text("You are: " +nickName);
         });
         socket.on('userUpdate', function(userList){
             $('#list').empty();
